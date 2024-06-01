@@ -10,9 +10,6 @@ from dataclasses import asdict
 # 프로젝트
 from autosink_data_elt.log.template.dishwashing import *
 
-# 상수 설정
-DEFAULT_TIMEZONE = 'Asia/Seoul'
-
 
 def setup_logger():
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -24,7 +21,7 @@ logger = setup_logger()
 
 class JSONFileHandler:
 
-    def __init__(self, user_id, timezone=DEFAULT_TIMEZONE):
+    def __init__(self, user_id, timezone='Asia/Seoul'):
         self.user_id = user_id
         self.timezone = pytz.timezone(timezone)
         self.image_counter = 0
