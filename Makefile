@@ -1,4 +1,4 @@
-PROJECT = myproject
+PROJECT = autosink_data_elt
 
 all: install lint test format
 
