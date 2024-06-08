@@ -1,6 +1,7 @@
 # 내장
-from typing import List
+from typing import List, Deque
 from dataclasses import dataclass, field
+from collections import deque
 
 # 프로젝트
 from autosink_data_elt.log.template.interaction import *
@@ -21,4 +22,4 @@ class DishwashingDataV2:
     user_id: str
     dishwashing_id: str
     dishwashing_start: str
-    interaction: List[InteractionV2] = field(default_factory=list)
+    interaction: Deque[InteractionV1] = field(default_factory=deque)

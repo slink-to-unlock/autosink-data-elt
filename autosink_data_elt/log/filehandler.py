@@ -12,7 +12,8 @@ from autosink_data_elt.log.template.dishwashing import *
 
 
 def setup_logger():
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+    logging.basicConfig(level=logging.INFO,
+                        format='%(asctime)s - %(levelname)s - %(message)s')
     return logging.getLogger(__name__)
 
 
@@ -43,10 +44,12 @@ class JSONFileHandler:
                 data = json.load(file)
                 version = data.get('version', 1)
                 if version == 1:
-                    logger.info(f'Read data with version 1 from {self.filename}')
+                    logger.info(
+                        f'Read data with version 1 from {self.filename}')
                     return DishwashingDataV1(**data)
                 elif version == 2:
-                    logger.info(f'Read data with version 2 from {self.filename}')
+                    logger.info(
+                        f'Read data with version 2 from {self.filename}')
                     return DishwashingDataV2(**data)
                 else:
                     logger.error(f'Unsupported version: {version}')
@@ -66,24 +69,21 @@ class JSONFileHandler:
 
     def create_default_data(self, dishwashing_start=None, version=2):
         if dishwashing_start is None:
-            dishwashing_start = datetime.now(self.timezone).isoformat(timespec='seconds')
+            dishwashing_start = datetime.now(
+                self.timezone).isoformat(timespec='seconds')
 
         if version == 1:
             logger.info(f'Creating default data with version 1')
-            return DishwashingDataV1(
-                version=1,
-                user_id=self.user_id,
-                dishwashing_id=self.dishwashing_id,
-                dishwashing_start=dishwashing_start
-            )
+            return DishwashingDataV1(version=1,
+                                     user_id=self.user_id,
+                                     dishwashing_id=self.dishwashing_id,
+                                     dishwashing_start=dishwashing_start)
         elif version == 2:
             logger.info(f'Creating default data with version 2')
-            return DishwashingDataV2(
-                version=2,
-                user_id=self.user_id,
-                dishwashing_id=self.dishwashing_id,
-                dishwashing_start=dishwashing_start
-            )
+            return DishwashingDataV2(version=2,
+                                     user_id=self.user_id,
+                                     dishwashing_id=self.dishwashing_id,
+                                     dishwashing_start=dishwashing_start)
         else:
             logger.error(f'Unsupported version: {version}')
             raise ValueError(f'Unsupported version: {version}')
@@ -116,9 +116,18 @@ if __name__ == '__main__':
     data = file_handler.create_default_data(dishwashing_start, version=2)
 
     # 상호작용 객체 생성 및 추가
-    data = file_handler.add_interaction(data, model_output=0, arduino_output=0, magnetic_status=0)
-    data = file_handler.add_interaction(data, model_output=0, arduino_output=0, magnetic_status=0)
-    data = file_handler.add_interaction(data, model_output=0, arduino_output=1, magnetic_status=1)
+    data = file_handler.add_interaction(data,
+                                        model_output=0,
+                                        arduino_output=0,
+                                        magnetic_status=0)
+    data = file_handler.add_interaction(data,
+                                        model_output=0,
+                                        arduino_output=0,
+                                        magnetic_status=0)
+    data = file_handler.add_interaction(data,
+                                        model_output=0,
+                                        arduino_output=1,
+                                        magnetic_status=1)
 
     # 파일에 쓰기
     file_handler.write_file(data)
