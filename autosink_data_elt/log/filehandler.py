@@ -6,6 +6,7 @@ import logging
 import pytz
 from datetime import datetime
 from dataclasses import asdict
+from collections import deque
 
 # 프로젝트
 from autosink_data_elt.log.template.dishwashing import *
@@ -63,11 +64,14 @@ class JSONFileHandler:
 
     def write_file(self, data):
         with open(self.filename, 'w') as file:
-            json.dump(asdict(data), file, indent=4)
+            json.dump(data.to_dict(), file, indent=4)
         self.image_counter = 0  # Reset the image counter after writing to file
         logger.info(f'Wrote data to {self.filename} and reset image counter')
 
-    def create_default_data(self, dishwashing_start=None, version=2):
+    def create_default_data(self,
+                            dishwashing_start=None,
+                            version=2,
+                            deque_size=10):
         if dishwashing_start is None:
             dishwashing_start = datetime.now(
                 self.timezone).isoformat(timespec='seconds')
@@ -83,27 +87,28 @@ class JSONFileHandler:
             return DishwashingDataV2(version=2,
                                      user_id=self.user_id,
                                      dishwashing_id=self.dishwashing_id,
-                                     dishwashing_start=dishwashing_start)
+                                     dishwashing_start=dishwashing_start,
+                                     interaction=deque(maxlen=deque_size))
         else:
             logger.error(f'Unsupported version: {version}')
             raise ValueError(f'Unsupported version: {version}')
 
     def add_interaction(self, data, **kwargs):
-        timestamp = datetime.now(self.timezone).isoformat(timespec='seconds')
-        image = f'{self.image_counter}.png'
-        self.image_counter += 1
-        logger.info(f'Adding interaction with image {image}')
+        timestamp = datetime.now().isoformat(timespec='seconds')
+        # logger.info(f'Adding interaction with image from kwargs')
 
         if data.version == 1:
-            interaction = InteractionV1.create(timestamp, image, **kwargs)
+            interaction = InteractionV1.create(timestamp, kwargs.pop('image'),
+                                               **kwargs)
         elif data.version == 2:
-            interaction = InteractionV2.create(timestamp, image, **kwargs)
+            interaction = InteractionV2.create(timestamp, kwargs.pop('image'),
+                                               **kwargs)
         else:
             logger.error(f'Unsupported version: {data.version}')
             raise ValueError(f'Unsupported version: {data.version}')
 
         data.interaction.append(interaction)
-        logger.info(f'Added interaction: {interaction}')
+        # logger.info(f'Added interaction: {interaction}')
         return data
 
 

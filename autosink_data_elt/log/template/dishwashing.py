@@ -1,6 +1,6 @@
 # 내장
 from typing import List, Deque
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 from collections import deque
 
 # 프로젝트
@@ -15,6 +15,13 @@ class DishwashingDataV1:
     dishwashing_start: str
     interaction: List[InteractionV1] = field(default_factory=list)
 
+    def to_dict(self):
+        data_dict = asdict(self)
+        data_dict['interaction'] = [
+            interaction.to_dict() for interaction in self.interaction
+        ]
+        return data_dict
+
 
 @dataclass
 class DishwashingDataV2:
@@ -22,4 +29,12 @@ class DishwashingDataV2:
     user_id: str
     dishwashing_id: str
     dishwashing_start: str
-    interaction: Deque[InteractionV1] = field(default_factory=deque)
+    interaction: Deque[InteractionV2] = field(
+        default_factory=lambda: deque(maxlen=10))
+
+    def to_dict(self):
+        data_dict = asdict(self)
+        data_dict['interaction'] = [
+            interaction.to_dict() for interaction in self.interaction
+        ]
+        return data_dict
