@@ -6,20 +6,24 @@ from typing import Union, Optional
 
 # 프로젝트
 from autosink_data_elt.path.base import BasePath
-from autosink_data_elt.path.backends import GDRIVE_BACKEND
+from autosink_data_elt.path.backends import (
+    MountingSystemBackendsI,
+    GDRIVE_BACKEND,
+    LOCAL_BACKEND,
+)
 
 
 class AutosinkPath(BasePath):
     """ Autosink 프로젝트에 한정하여 경로들을 잘 관리하기 위해 만든 클래스.
     Autosink 프로젝트에서는 다음과 같은 정책으로 feature store 과 data lake 를 관리합니다.
     # `autowash/data-lake`
-    # `autowash/feature-store/train/v{*}/{0,1}`
-    # `autowash/feature-store/validation/v*/case{*}}/{0,1}`
+    # `autowash/feature-store/train/v{*}/*/{0,1}`
+    # `autowash/feature-store/validation/v{*}/*/case{*}}/{0,1}`
     """
 
     def __init__(
         self,
-        backend: str = GDRIVE_BACKEND,
+        backend: Union[MountingSystemBackendsI, str] = GDRIVE_BACKEND,
         mount_dir: Optional[Union[os.PathLike, str]] = None,
         data_lake_rel_dir: Union[os.PathLike, str] = '',
         feature_store_rel_dir: Union[os.PathLike, str] = '',
@@ -30,8 +34,6 @@ class AutosinkPath(BasePath):
         Args:
           feature_store_rel_dir: 드라이브 내에서 Autosink 프로젝트의 피처 스토어 디렉토리의 상대경로
         """
-        if backend is GDRIVE_BACKEND and (not mount_dir):
-            mount_dir = os.path.join('/', 'content', 'mnt')
         super().__init__(backend, mount_dir)
         self.data_lake_rel_dir = data_lake_rel_dir
         self.feature_store_rel_dir = feature_store_rel_dir
@@ -67,14 +69,21 @@ class AutosinkPath(BasePath):
 
 
 if __name__ == '__main__':
-    # FIXME: 디렉토리 정리 필요. 클래스 주석 참고.
-    # `autowash/artifacts/{models, experiments/tensorboard}`
     path = AutosinkPath(
-        data_lake_rel_dir=os.path.join('dev', 'autowash_dataset', 'data', 'data-lake'),
-        feature_store_rel_dir=os.path.join('dev', 'autowash_dataset', 'data', 'feature-store'),
+        data_lake_rel_dir=os.path.join('dev', 'autowash', 'data', 'data-lake'),
+        feature_store_rel_dir=os.path.join('dev', 'autowash', 'data', 'feature-store', 'train'),
     )
-    print(path.mount_dir)
     print(path.drive_dir)
-    print(path.feature_store_dir)
     print(path.data_lake_dir)
+    print(path.feature_store_dir)
+    print(path.get_dataset_root_dir('v3'))
+
+    path = AutosinkPath(
+        backend=LOCAL_BACKEND,
+        data_lake_rel_dir=os.path.join('data-lake'),
+        feature_store_rel_dir=os.path.join('feature-store'),
+    )
+    print(path.drive_dir)
+    print(path.data_lake_dir)
+    print(path.feature_store_dir)
     print(path.get_dataset_root_dir('v3'))
