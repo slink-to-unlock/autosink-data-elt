@@ -73,6 +73,7 @@ if __name__ == '__main__':
         data_lake_rel_dir=os.path.join('dev', 'autowash', 'data', 'data-lake'),
         feature_store_rel_dir=os.path.join('dev', 'autowash', 'data', 'feature-store', 'train'),
     )
+    print(path.mount_dir)
     print(path.drive_dir)
     print(path.data_lake_dir)
     print(path.feature_store_dir)
@@ -83,6 +84,7 @@ if __name__ == '__main__':
         data_lake_rel_dir=os.path.join('data-lake'),
         feature_store_rel_dir=os.path.join('feature-store'),
     )
+    print(path.mount_dir)
     print(path.drive_dir)
     print(path.data_lake_dir)
     print(path.feature_store_dir)

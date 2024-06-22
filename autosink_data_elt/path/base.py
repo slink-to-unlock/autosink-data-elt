@@ -43,6 +43,10 @@ class BasePath:
         self._backend = v
 
     @property
+    def mount_dir(self) -> Union[str, os.PathLike]:
+        return self.backend.mount_dir
+
+    @property
     def drive_dir(self) -> Union[str, os.PathLike]:
         """ 드라이브 루트 경로
         """
