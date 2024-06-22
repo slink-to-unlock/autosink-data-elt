@@ -5,12 +5,15 @@ import os
 from typing import Union, Optional
 
 # 프로젝트
+from autosink_data_elt.log.utils import get_logger
 from autosink_data_elt.path.base import BasePath
 from autosink_data_elt.path.backends import (
     MountingSystemBackendsI,
     GDRIVE_BACKEND,
     LOCAL_BACKEND,
 )
+
+logger = get_logger(__name__)
 
 
 class AutosinkPath(BasePath):
@@ -67,17 +70,29 @@ class AutosinkPath(BasePath):
             version,
         )
 
+    @property
+    def latest_dataset_root_dir(self) -> Union[os.PathLike, str]:
+        """ Feature store 디렉토리의 서브디렉토리를 정렬했을 때 가장 latest 에 해당하는 서브디렉토리 경로
+        """
+        available_versions = sorted(os.listdir(self.feature_store_dir))
+        if not available_versions:
+            raise FileNotFoundError(f'경로 `{self.feature_store_dir}`에 디렉토리가 없습니다.')
+        latest_version = available_versions[-1]
+        logger.debug(f'사용 가능한 데이터셋 `{available_versions}`중 `{latest_version}`을 가져옵니다.')
+        return self.get_dataset_root_dir(latest_version)
+
 
 if __name__ == '__main__':
-    path = AutosinkPath(
-        data_lake_rel_dir=os.path.join('dev', 'autowash', 'data', 'data-lake'),
-        feature_store_rel_dir=os.path.join('dev', 'autowash', 'data', 'feature-store', 'train'),
-    )
-    print(path.mount_dir)
-    print(path.drive_dir)
-    print(path.data_lake_dir)
-    print(path.feature_store_dir)
-    print(path.get_dataset_root_dir('v3'))
+    # path = AutosinkPath(
+    #     data_lake_rel_dir=os.path.join('dev', 'autowash', 'data', 'data-lake'),
+    #     feature_store_rel_dir=os.path.join('dev', 'autowash', 'data', 'feature-store', 'train'),
+    # )
+    # print(path.mount_dir)
+    # print(path.drive_dir)
+    # print(path.data_lake_dir)
+    # print(path.feature_store_dir)
+    # print(path.get_dataset_root_dir('v3'))
+    # print(path.latest_dataset_root_dir)
 
     path = AutosinkPath(
         backend=LOCAL_BACKEND,
@@ -89,3 +104,4 @@ if __name__ == '__main__':
     print(path.data_lake_dir)
     print(path.feature_store_dir)
     print(path.get_dataset_root_dir('v3'))
+    print(path.latest_dataset_root_dir)
