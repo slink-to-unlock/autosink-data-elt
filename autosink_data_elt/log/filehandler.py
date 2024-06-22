@@ -32,29 +32,20 @@ class JSONFileHandler:
         hash_input = (self.user_id + str(datetime.now())).encode('utf-8')
         return hashlib.sha1(hash_input).hexdigest()[:10]
 
-    def read_file(self):
-        try:
-            with open(self.filename, 'r') as file:
-                data = json.load(file)
-                version = data.get('version', 1)
-                if version == 1:
-                    logger.info(f'Read data with version 1 from {self.filename}')
-                    return DishwashingDataV1(**data)
-                elif version == 2:
-                    logger.info(f'Read data with version 2 from {self.filename}')
-                    return DishwashingDataV2(**data)
-                else:
-                    logger.error(f'Unsupported version: {version}')
-                    raise ValueError(f'Unsupported version: {version}')
-        except FileNotFoundError:
-            logger.error(f'File {self.filename} not found')
-            raise
-        except json.JSONDecodeError:
-            logger.error(f'Error decoding JSON from file {self.filename}')
-            raise
+    @classmethod
+    def read_file(cls, json_path):
+        with open(json_path, 'r', encoding='utf-8') as file:
+            d = json.load(file)
+            version = d.get('version', 1)
+            if version == 1:
+                return DishwashingDataV1(**d)
+            elif version == 2:
+                return DishwashingDataV2(**d)
+            else:
+                raise ValueError(f'Unsupported version: {version}')
 
     def write_file(self, data):
-        with open(self.filename, 'w') as file:
+        with open(self.filename, 'w', encoding='utf-8') as file:
             json.dump(data.to_dict(), file, indent=4)
         self.image_counter = 0  # Reset the image counter after writing to file
         logger.info(f'Wrote data to {self.filename} and reset image counter')
@@ -64,7 +55,6 @@ class JSONFileHandler:
             dishwashing_start = datetime.now(self.timezone).isoformat(timespec='seconds')
 
         if version == 1:
-            logger.info(f'Creating default data with version 1')
             return DishwashingDataV1(
                 version=1,
                 user_id=self.user_id,
@@ -72,7 +62,6 @@ class JSONFileHandler:
                 dishwashing_start=dishwashing_start
             )
         elif version == 2:
-            logger.info(f'Creating default data with version 2')
             return DishwashingDataV2(
                 version=2,
                 user_id=self.user_id,
@@ -81,19 +70,16 @@ class JSONFileHandler:
                 interactions=deque(maxlen=deque_size)
             )
         else:
-            logger.error(f'Unsupported version: {version}')
             raise ValueError(f'Unsupported version: {version}')
 
     def add_interaction(self, data, **kwargs):
         timestamp = datetime.now().isoformat(timespec='seconds')
-        # logger.info(f'Adding interaction with image from kwargs')
 
         if data.version == 1:
             interaction = InteractionV1.create(timestamp, kwargs.pop('image'), **kwargs)
         elif data.version == 2:
             interaction = InteractionV2.create(timestamp, kwargs.pop('image'), **kwargs)
         else:
-            logger.error(f'Unsupported version: {data.version}')
             raise ValueError(f'Unsupported version: {data.version}')
 
         data.interactions.append(interaction)
@@ -118,5 +104,7 @@ if __name__ == '__main__':
     file_handler.write_file(data)
 
     # 파일에서 읽기
-    read_data = file_handler.read_file()
+    read_data = JSONFileHandler.read_file(
+        'volume/data-lake/extract/20240615_180539/interactions.json'
+    )
     print(read_data)

@@ -20,6 +20,10 @@ class DishwashingDataV1:
         data_dict['interactions'] = [interaction.to_dict() for interaction in self.interactions]
         return data_dict
 
+    def __post_init__(self):
+        if self.interactions and isinstance(self.interactions[0], dict):
+            self.interactions = [InteractionV1(**interaction) for interaction in self.interactions]
+
 
 @dataclass
 class DishwashingDataV2:
@@ -33,3 +37,7 @@ class DishwashingDataV2:
         data_dict = asdict(self)
         data_dict['interactions'] = [interaction.to_dict() for interaction in self.interactions]
         return data_dict
+
+    def __post_init__(self):
+        if self.interactions and isinstance(self.interactions[0], dict):
+            self.interactions = [InteractionV2(**interaction) for interaction in self.interactions]
