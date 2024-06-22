@@ -10,7 +10,7 @@ from collections import deque
 from autosink_data_elt.log.utils import get_logger
 from autosink_data_elt.log.template.dishwashing import *
 
-logger = get_logger(__name__)
+logger = get_logger(__file__)
 
 
 class JSONFileHandler:
