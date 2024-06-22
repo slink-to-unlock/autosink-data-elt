@@ -13,7 +13,7 @@ from autosink_data_elt.path.backends import (
     LOCAL_BACKEND,
 )
 
-logger = get_logger(__file__)
+logger = get_logger('autosink')
 
 
 class AutosinkPath(BasePath):
