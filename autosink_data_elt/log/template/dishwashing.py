@@ -17,9 +17,7 @@ class DishwashingDataV1:
 
     def to_dict(self):
         data_dict = asdict(self)
-        data_dict['interactions'] = [
-            interaction.to_dict() for interaction in self.interactions
-        ]
+        data_dict['interactions'] = [interaction.to_dict() for interaction in self.interactions]
         return data_dict
 
 
@@ -29,12 +27,9 @@ class DishwashingDataV2:
     user_id: str
     dishwashing_id: str
     dishwashing_start: str
-    interactions: Deque[InteractionV2] = field(
-        default_factory=lambda: deque(maxlen=10))
+    interactions: Deque[InteractionV2] = field(default_factory=lambda: deque(maxlen=10))
 
     def to_dict(self):
         data_dict = asdict(self)
-        data_dict['interactions'] = [
-            interaction.to_dict() for interaction in self.interactions
-        ]
+        data_dict['interactions'] = [interaction.to_dict() for interaction in self.interactions]
         return data_dict
