@@ -71,15 +71,43 @@ class AutosinkPath(BasePath):
         )
 
     @property
-    def latest_dataset_root_dir(self) -> Union[os.PathLike, str]:
-        """ Feature store 디렉토리의 서브디렉토리를 정렬했을 때 가장 latest 에 해당하는 서브디렉토리 경로
-        """
+    def available_versions_in_feature_store(self):
         available_versions = sorted(os.listdir(self.feature_store_dir))
         if not available_versions:
             raise FileNotFoundError(f'경로 `{self.feature_store_dir}`에 디렉토리가 없습니다.')
+        return available_versions
+
+    @property
+    def latest_dataset_root_dir(self) -> Union[os.PathLike, str]:
+        """ Feature store 디렉토리의 서브디렉토리를 정렬했을 때 가장 latest 에 해당하는 서브디렉토리 경로
+        예를 들어, 서브디렉토리에 v3, v4, v5 가 있다면 v5 의 경로를 반환한다.
+        """
+        available_versions = self.available_versions_in_feature_store
         latest_version = available_versions[-1]
         logger.debug(f'사용 가능한 데이터셋 `{available_versions}`중 `{latest_version}`을 가져옵니다.')
         return self.get_dataset_root_dir(latest_version)
+
+    @property
+    def next_dataset_root_dir(self) -> Union[os.PathLike, str]:
+        """ Feature store 디렉토리의 서브디렉토리를 고려할 때 다음에 추가될 데이터셋 서브디렉토리 경로
+        예를 들어, 서브디렉토리에 v3, v4, v5 가 있다면 다음은 v6 이다. v6 의 경로를 반환한다.
+        단, 이 함수를 실행한다고 해서 경로를 생성하지는 않는다.
+        NOTE: feature store 내 서브디렉토리는 항상 `v{n}` 의 형태로 이름붙여진다고 전제한다.
+        """
+        available_versions = self.available_versions_in_feature_store
+        latest_version = available_versions[-1]
+        latest_version_number = int(latest_version[1:])
+        next_version = f'v{latest_version_number + 1}'
+        ret = self.get_dataset_root_dir(next_version)
+        logger.debug(
+            f'사용 가능한 데이터셋이 `{available_versions}`이므로, '
+            f'다음 데이터셋 버전 `{next_version}`의 경로를 반환합니다.'
+        )
+        assert not os.path.exists(ret), (
+            f'구현상 문제입니다. `{ret}` 경로가 생성되어서는 안됩니다. '
+            '이때 경로가 생성되는 방식으로 구현된다면 로직이 꼬이게 됩니다.'
+        )
+        return ret
 
 
 if __name__ == '__main__':
@@ -105,3 +133,4 @@ if __name__ == '__main__':
     print(path.feature_store_dir)
     print(path.get_dataset_root_dir('v3'))
     print(path.latest_dataset_root_dir)
+    print(path.next_dataset_root_dir)
