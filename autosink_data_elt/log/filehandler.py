@@ -23,10 +23,8 @@ class JSONFileHandler:
         self.folder_name = self.dishwashing_id
         self.filename = os.path.join(self.folder_name, 'interactions.json')
         os.makedirs(self.folder_name, exist_ok=True)
-        logger.info(
-            'Initialized JSONFileHandler with '
-            f'folder {self.folder_name} and file {self.filename}'
-        )
+        logger.info('Initialized JSONFileHandler with '
+                    f'folder {self.folder_name} and file {self.filename}')
 
     def _generate_dishwashing_id(self):
         hash_input = (self.user_id + str(datetime.now())).encode('utf-8')
@@ -50,25 +48,25 @@ class JSONFileHandler:
         self.image_counter = 0  # Reset the image counter after writing to file
         logger.info(f'Wrote data to {self.filename} and reset image counter')
 
-    def create_default_data(self, dishwashing_start=None, version=2, deque_size=10):
+    def create_default_data(self,
+                            dishwashing_start=None,
+                            version=2,
+                            deque_size=10):
         if dishwashing_start is None:
-            dishwashing_start = datetime.now(self.timezone).isoformat(timespec='seconds')
+            dishwashing_start = datetime.now(
+                self.timezone).isoformat(timespec='seconds')
 
         if version == 1:
-            return DishwashingDataV1(
-                version=1,
-                user_id=self.user_id,
-                dishwashing_id=self.dishwashing_id,
-                dishwashing_start=dishwashing_start
-            )
+            return DishwashingDataV1(version=1,
+                                     user_id=self.user_id,
+                                     dishwashing_id=self.dishwashing_id,
+                                     dishwashing_start=dishwashing_start)
         elif version == 2:
-            return DishwashingDataV2(
-                version=2,
-                user_id=self.user_id,
-                dishwashing_id=self.dishwashing_id,
-                dishwashing_start=dishwashing_start,
-                interactions=deque(maxlen=deque_size)
-            )
+            return DishwashingDataV2(version=2,
+                                     user_id=self.user_id,
+                                     dishwashing_id=self.dishwashing_id,
+                                     dishwashing_start=dishwashing_start,
+                                     interactions=deque(maxlen=deque_size))
         else:
             raise ValueError(f'Unsupported version: {version}')
 
@@ -76,9 +74,11 @@ class JSONFileHandler:
         timestamp = datetime.now().isoformat(timespec='seconds')
 
         if data.version == 1:
-            interaction = InteractionV1.create(timestamp, kwargs.pop('image'), **kwargs)
+            interaction = InteractionV1.create(timestamp, kwargs.pop('image'),
+                                               **kwargs)
         elif data.version == 2:
-            interaction = InteractionV2.create(timestamp, kwargs.pop('image'), **kwargs)
+            interaction = InteractionV2.create(timestamp, kwargs.pop('image'),
+                                               **kwargs)
         else:
             raise ValueError(f'Unsupported version: {data.version}')
 
@@ -96,15 +96,23 @@ if __name__ == '__main__':
     data = file_handler.create_default_data(dishwashing_start, version=2)
 
     # 상호작용 객체 생성 및 추가
-    data = file_handler.add_interaction(data, model_output=0, arduino_output=0, magnetic_status=0)
-    data = file_handler.add_interaction(data, model_output=0, arduino_output=0, magnetic_status=0)
-    data = file_handler.add_interaction(data, model_output=0, arduino_output=1, magnetic_status=1)
+    data = file_handler.add_interaction(data,
+                                        model_output=0,
+                                        arduino_output=0,
+                                        magnetic_status=0)
+    data = file_handler.add_interaction(data,
+                                        model_output=0,
+                                        arduino_output=0,
+                                        magnetic_status=0)
+    data = file_handler.add_interaction(data,
+                                        model_output=0,
+                                        arduino_output=1,
+                                        magnetic_status=1)
 
     # 파일에 쓰기
     file_handler.write_file(data)
 
     # 파일에서 읽기
     read_data = JSONFileHandler.read_file(
-        'volume/data-lake/extract/20240615_180539/interactions.json'
-    )
+        'volume/data-lake/extract/20240615_180539/interactions.json')
     print(read_data)

@@ -5,21 +5,21 @@ from dataclasses import dataclass
 class InteractionV1:
     timestamp: str
     model_output: int
-    magnetic: int
+    magnetic_status: int
     image: str
 
     @staticmethod
     def create(timestamp, image, **kwargs):
         return InteractionV1(timestamp=timestamp,
                              model_output=kwargs.get('model_output', 0),
-                             magnetic=kwargs.get('magnetic', 0),
+                             magnetic_status=kwargs.get('magnetic_status', 0),
                              image=image)
 
     def to_dict(self):
         return {
             "timestamp": self.timestamp,
             "model_output": self.model_output,
-            "magnetic": self.magnetic,
+            "magnetic_status": self.magnetic_status,
             "image": self.image
         }
 
